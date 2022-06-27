@@ -12,14 +12,10 @@ const server = http.createServer(async (req, res) => {
 
 	switch (req.url) {
 		case "/items":
-			const itemsResponse = await itemsRoute(req, res);
-			console.log("DEBUG -> server -> itemsResponse", itemsResponse);
-			res.end(itemsResponse);
+			await itemsRoute(req, res);
 			break;
 		case "/item":
-			const itemResponse = await itemsRoute(req, res);
-			console.log("DEBUG -> server -> itemsResponse", itemResponse);
-			res.end(itemResponse);
+			await itemsRoute(req, res);
 			break;
 
 		default:

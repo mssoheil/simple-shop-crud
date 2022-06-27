@@ -1,21 +1,23 @@
-const fs = require("fs-extra");
-const path = require("path");
 const utils = require("./utils");
-const uuid = require("uuid");
-
-async function getData() {
-	try {
-		const data = await fs.readFile(path.join(__dirname, "data", "data.json"), "utf8");
-		console.log("DEBUG -> getData -> data", data);
-		return data;
-	} catch (error) {
-		console.log("DEBUG -> getData -> error", error);
-	}
-}
+const services = require("./services");
 
 module.exports = async (req, res) => {
-	console.log("DEBUG -> req.url", req.url);
 	if (req.url !== "/items") {
+		try {
+			// add item
+			if (req.method === "POST") {
+				const data = await services.addItem(req);
+
+				res.writeHead(200, { "Content-Type": utils.getContentType(".json") });
+				res.end(JSON.stringify(data));
+			}
+			// remove item
+			// modify item
+			// get specific item
+		} catch (error) {
+			console.log("DEBUG -> module.exports= -> error", error);
+		}
+		return;
 	}
 
 	if (req.method !== "GET") {
@@ -25,11 +27,10 @@ module.exports = async (req, res) => {
 
 	// get all items
 	try {
-		const data = getData();
-		console.log("DEBUG -> module.exports= -> data", data);
+		const items = await services.getItems();
 		res.writeHead(200, { "Content-Type": utils.getContentType(".json") });
-		return data;
+		res.end(items);
 	} catch (error) {
-		console.log("DEBUG -> module.exports= -> error", error);
+		console.log("DEBUG -> get all items -> error", error);
 	}
 };
