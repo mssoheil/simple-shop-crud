@@ -1,5 +1,7 @@
 const utils = require("./utils");
 const services = require("./services");
+const url = require("url");
+const validator = require("validator");
 
 module.exports = async (req, res) => {
 	if (req.url !== "/items") {
@@ -9,9 +11,19 @@ module.exports = async (req, res) => {
 				const data = await services.addItem(req);
 
 				res.writeHead(200, { "Content-Type": utils.getContentType(".json") });
-				res.end(JSON.stringify(data));
+				return res.end(JSON.stringify(data));
 			}
 			// remove item
+			if (req.method === "DELETE") {
+				const id = url.parse(req.url, true).query.id;
+				if (!validator.isUUID(id)) {
+					return res.end("id is wrong");
+				}
+				const data = await services.removeItem(id);
+
+				res.writeHead(200, { "Content-Type": utils.getContentType(".json") });
+				return res.end(JSON.stringify(data));
+			}
 			// modify item
 			// get specific item
 		} catch (error) {

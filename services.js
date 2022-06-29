@@ -3,6 +3,8 @@ const path = require("path");
 const utils = require("./utils");
 const uuid = require("uuid");
 
+const dataPath = path.join(__dirname, "data", "data.json");
+
 const services = {
 	async getErrors(errorCode) {
 		if (errorCode === 404) {
@@ -32,8 +34,24 @@ const services = {
 
 			data.push(newData);
 
-			await fs.writeFile(path.join(__dirname, "data", "data.json"), JSON.stringify(data, null, 4));
+			await fs.writeFile(dataPath, JSON.stringify(data, null, 4));
 			return data;
+		} catch (error) {
+			console.log("DEBUG -> addItem -> error", error);
+			return "error";
+		}
+	},
+	async removeItem(id) {
+		try {
+			const data = await utils.getData();
+
+			const foundItem = data.find((item) => item.id === id);
+			if (foundItem) {
+				const newData = data.filter((item) => item.id !== id);
+				await fs.writeFile(dataPath, JSON.stringify(newData));
+				return newData;
+			}
+			return "item does not exist";
 		} catch (error) {
 			console.log("DEBUG -> addItem -> error", error);
 			return "error";
