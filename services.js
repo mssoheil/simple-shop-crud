@@ -2,6 +2,7 @@ const fs = require("fs-extra");
 const path = require("path");
 const utils = require("./utils");
 const uuid = require("uuid");
+const { URL } = require("url");
 
 const dataPath = path.join(__dirname, "data", "data.json");
 
@@ -52,6 +53,47 @@ const services = {
 				return newData;
 			}
 			return "item does not exist";
+		} catch (error) {
+			console.log("DEBUG -> addItem -> error", error);
+			return "error";
+		}
+	},
+	async getItem(id) {
+		try {
+			const data = await utils.getData();
+
+			const foundItem = data.find((item) => item.id === id);
+
+			if (foundItem) {
+				return foundItem;
+			}
+			return "item does not exist";
+		} catch (error) {
+			console.log("DEBUG -> addItem -> error", error);
+			return "error";
+		}
+	},
+	async editItem(req) {
+		try {
+			const newUrl = new URL(req.url, "http://localhost:5000");
+			const id = newUrl.searchParams.get("id");
+			const data = await utils.getData();
+			const body = await utils.getBody(req);
+
+			const itemIndex = data.findIndex((item) => item.id === id);
+
+			if (itemIndex === -1) {
+				return "item does not exist";
+			}
+			const item = data[itemIndex];
+
+			item.name = body.name;
+			item.price = body.price;
+			item.description = body.description;
+
+			data[itemIndex] = item;
+			await fs.writeFile(dataPath, JSON.stringify(data));
+			return item;
 		} catch (error) {
 			console.log("DEBUG -> addItem -> error", error);
 			return "error";

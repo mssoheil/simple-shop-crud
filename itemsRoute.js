@@ -1,6 +1,7 @@
 const utils = require("./utils");
 const services = require("./services");
 const url = require("url");
+const { URL } = require("url");
 const validator = require("validator");
 
 module.exports = async (req, res) => {
@@ -24,8 +25,34 @@ module.exports = async (req, res) => {
 				res.writeHead(200, { "Content-Type": utils.getContentType(".json") });
 				return res.end(JSON.stringify(data));
 			}
-			// modify item
 			// get specific item
+			if (req.method === "GET") {
+				const newUrl = new URL(req.url, "http://localhost:5000");
+				const id = newUrl.searchParams.get("id");
+				if (!validator.isUUID(id)) {
+					res.writeHead(400, { "Content-Type": utils.getContentType(".txt") });
+					return res.end("id is wrong");
+				}
+				const item = await services.getItem(id);
+				res.writeHead(200, { "Content-Type": utils.getContentType(".json") });
+				res.end(JSON.stringify(item));
+			}
+			// modify item
+			if (req.method === "PUT") {
+				const newUrl = new URL(req.url, "http://localhost:5000");
+				const id = newUrl.searchParams.get("id");
+				if (!validator.isUUID(id)) {
+					res.writeHead(400, { "Content-Type": utils.getContentType(".txt") });
+					return res.end("id is wrong");
+				}
+				const data = await services.editItem(req);
+				if (typeof data === "string") {
+					res.writeHead(404, { "Content-Type": utils.getContentType(".txt") });
+					return res.end(data);
+				}
+				res.writeHead(200, { "Content-Type": utils.getContentType(".json") });
+				res.end(JSON.stringify(data));
+			}
 		} catch (error) {
 			console.log("DEBUG -> module.exports= -> error", error);
 		}

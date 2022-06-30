@@ -9,6 +9,8 @@ function getContentType(extention) {
 			return "text/css";
 		case ".json":
 			return "application/json";
+		case ".txt":
+			return "text/plain";
 
 		default:
 			return "text/html";
